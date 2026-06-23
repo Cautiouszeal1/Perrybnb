@@ -364,13 +364,16 @@
             txHash = null;
         }
 
-        // Listen for account/chain changes
+        // Listen for account/chain changes (don't reload, just update UI)
         if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => {
-                location.reload();
-            });
-            window.ethereum.on('chainChanged', () => {
-                location.reload();
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    connectedAccount = null;
+                    document.getElementById('formSection').classList.add('hidden');
+                    document.getElementById('connectionStatus').textContent = 'Wallet disconnected';
+                    document.getElementById('connectBtn').textContent = 'Connect MetaMask';
+                    document.getElementById('connectBtn').disabled = false;
+                }
             });
         }
     </script>
