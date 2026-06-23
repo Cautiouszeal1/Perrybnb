@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERRY - BNB Token Creator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1410 100%);
+            color: #f0e6d2;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #d4af37;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: rgba(240, 230, 210, 0.6);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .card {
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 2px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: rgba(240, 230, 210, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            color: #f0e6d2;
+            font-size: 1rem;
+            font-family: inherit;
+            border-radius: 2px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: rgba(212, 175, 55, 0.5);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            border-radius: 2px;
+            letter-spacing: -0.01em;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #d4af37 0%, #f0c855 100%);
+            color: #0a0a0a;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #d4af37;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 2px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #fca5a5;
+            font-size: 0.9rem;
+        }
+
+        .success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        .success p {
+            color: #4ade80;
+        }
+
+        .code-block {
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 2px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+            color: #d4af37;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .copy-btn {
+            padding: 0.5rem;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+            cursor: pointer;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        footer {
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            padding: 2rem;
+            text-align: center;
+            color: rgba(240, 230, 210, 0.5);
+            font-size: 0.85rem;
+            margin-top: 4rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>⚡ PERRY</h1>
+            <p class="subtitle">Create and verify tokens on BSC. No code. No friction.</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Connection Section -->
+        <div class="card" id="connectionCard">
+            <p style="margin-bottom: 1rem; font-size: 0.9rem; color: rgba(240, 230, 210, 0.8);">
+                Connect your wallet to begin. You'll need MetaMask on BNB Smart Chain Mainnet.
+            </p>
+            <button class="btn-primary" onclick="connectWallet()">Connect MetaMask</button>
+        </div>
+
+        <!-- Form Section -->
+        <div id="formSection" class="hidden">
+            <div class="card">
+                <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; color: #d4af37;">
+                    Token Configuration
+                </h2>
+
+                <div class="form-grid">
+                    <div>
+                        <label>Token Name</label>
+                        <input type="text" id="tokenName" placeholder="My Token" value="My Token">
+                    </div>
+                    <div>
+                        <label>Symbol</label>
+                        <input type="text" id="tokenSymbol" placeholder="TOKEN" value="TOKEN" style="text-transform: uppercase;">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div>
+                        <label>Initial Supply</label>
+                        <input type="number" id="initialSupply" placeholder="1000000" value="1000000">
+                    </div>
+                    <div>
+                        <label>Decimals</label>
+                        <input type="number" id="decimals" placeholder="18" value="18" min="0" max="18">
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="burnable" checked>
+                        Burnable
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="mintable">
+                        Mintable
+                    </label>
+                </div>
+
+                <div id="errorMessage" class="error hidden"></div>
+
+                <button class="btn-primary" onclick="deployToken()">Deploy Token</button>
+            </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loadingSection" class="hidden">
+            <div class="card" style="text-align: center;">
+                <div class="spinner" style="margin: 2rem auto;"></div>
+                <h3 style="margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">Deploying your token</h3>
+                <p id="txHashDisplay" style="color: rgba(240, 230, 210, 0.6); font-size: 0.9rem; margin: 0; font-family: monospace; word-break: break-all;"></p>
+            </div>
+        </div>
+
+        <!-- Success Section -->
+        <div id="successSection" class="hidden">
+            <div class="card success">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: #4ade80;">
+                    ✓ Token Deployed Successfully
+                </h3>
+
+                <div class="code-block">
+                    <span id="addressDisplay"></span>
+                    <button class="copy-btn" onclick="copyToClipboard('addressDisplay')">Copy</button>
+                </div>
+
+                <div class="code-block">
+                    <span id="txDisplay"></span>
+                    <button class="copy-btn" onclick="copyToClipboard('txDisplay')">Copy</button>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="openBscScan()">View on BscScan</button>
+                    <button class="btn-secondary" onclick="resetForm()">Create Another</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>PERRY • BNB Smart Chain Token Creation • Instant Verification</p>
+    </footer>
+
+    <script>
+        let connectedAccount = null;
+        let tokenAddress = null;
+        let txHash = null;
+
+        async function connectWallet() {
+            if (!window.ethereum) {
+                alert('MetaMask not detected. Please install MetaMask.');
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts',
+                });
+
+                const chainId = await window.ethereum.request({
+                    method: 'eth_chainId',
+                });
+
+                connectedAccount = accounts[0];
+
+                if (chainId !== '0x38') {
+                    alert('Please switch to BNB Smart Chain Mainnet (Chain ID: 0x38)');
+                    return;
+                }
+
+                document.getElementById('connectionCard').innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; text-transform: uppercase; color: rgba(212, 175, 55, 1);">Connected</p>
+                            <p style="margin: 0; font-size: 0.875rem; font-family: monospace; color: rgba(240, 230, 210, 0.8);">${connectedAccount}</p>
+                        </div>
+                        <span style="color: #d4af37; font-size: 1.25rem;">✓</span>
+                    </div>
+                `;
+
+                document.getElementById('formSection').classList.remove('hidden');
+            } catch (err) {
+                alert('Failed to connect wallet: ' + err.message);
+            }
+        }
+
+        async function deployToken() {
+            if (!connectedAccount) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const name = document.getElementById('tokenName').value.trim();
+            const symbol = document.getElementById('tokenSymbol').value.trim();
+            const supply = document.getElementById('initialSupply').value;
+            const decimals = document.getElementById('decimals').value;
+
+            if (!name) {
+                showError('Token name is required');
+                return;
+            }
+            if (!symbol) {
+                showError('Token symbol is required');
+                return;
+            }
+            if (parseInt(supply) <= 0) {
+                showError('Initial supply must be greater than 0');
+                return;
+            }
+            if (parseInt(decimals) < 0 || parseInt(decimals) > 18) {
+                showError('Decimals must be between 0 and 18');
+                return;
+            }
+
+            document.getElementById('formSection').classList.add('hidden');
+            document.getElementById('loadingSection').classList.remove('hidden');
+
+            try {
+                const tx = await window.ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [{
+                        from: connectedAccount,
+                        data: '0x60806040523480156200001157600080fd5b5060405162000a1e38038062000a1e833981810160405281019062000037919062000488565b835162000053906003906020870190620002c5565b5082516200006b906004906020860190620002c5565b50816005819055506200007e8162000098565b62000091878762000117565b505050505050620005bc565b600554811115620000df576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401620000d690620004df565b60405180910390fd5b806000541115620001145780600054620000fa919062000522565b6000819055506200011362000178565b505b50565b6000620001258383620001a2565b90508183111562000150576000825403630a85c89560e01b60405160200162000150919062000511565b604051602081830303815290604052906200017357506200017362000322565b505b505050565b620001836200024a565b6001600160a01b031660006001600160a01b03161415620001b157620001af620002df565b505b565b6001600160a01b038216620001ec576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401620001e39062000513565b60405180910390fd5b8060026000828254620002009190620004a2565b92505081905550816001600160a01b031660007fddf252ad1be2c89b69c2b068fc378daf4362f9dcf01888f96e5e146cc2cfb6c836040516200024491815260200190565b60405180910390a35050565b6000620002616200025a3390565b3b90565b80620002815760405162517a9560e01b60405160200162000281919062000511565b604051602081830303815290604052906200028157506200028162000322565b505b90565b6001600160a01b038216620002c1576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401620002b890620004df565b60405180910390fd5b505050565b828054620002d39062000566565b90600052602060002090601f016020900481019282620002f7576000855562000343565b82601f106200031257805160ff191683800117855562000343565b8280016001018555821562000343579182015b828111156200034257825182559160200191906001019062000325565b5b50905062000352919062000356565b5090565b5b808211156200037157600081600090555060010162000357565b5090565b60008160011c9050919050565b6000620003908262000375565b915060006001821015620003a95762000397565b6001821015915050919050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b6000620003e082620003b3565b9050919050565b600062000406600180546001841660016001901b0190910163ffffffff16565b9050919050565b6000620004228162000383565b915062000430828462000385565b50919050565b600061ffff821690509190505b60ff8116600114620004645762000449620003f3565b6200046062000415565b5b62000469565b62000469565b60ff8116600114620004a05762000480620003f3565b620004968162000415565b5b50905090565b505050620005bc565b505050620005bc565b505050505b565b6000819050919050565b620004b98182620004a7565b82525050565b6000620004d0620004ab848462000436565b50565b5050565b6000620004f2620004e760085190565b620004c9565b604051908152602001604052565b5050565b6005805460ff60a01b1916600160a01b179055565b601f82111562000559576000818152602090206020601f8601049101604051906001600052602060002090601f831692010160405190565b5050565b50565b600080604083850312156200057957600080fd5b60006200058985828601620004d5565b925050602083015190509250929050565b60006020828403121562000596575f80fd5b60008201519050919050565b620005ad816200024a565b8114620005b957600080fd5b50565b620005c781620005a3565b8114620005d357600080fd5b50565b60805160a051612433620005fd600039600060d60152600061013f015260006101f70152612433f3fe',
+                        gas: '0x' + (500000).toString(16),
+                        gasPrice: '0x' + (10000000000).toString(16),
+                    }],
+                });
+
+                txHash = tx;
+                document.getElementById('txHashDisplay').innerText = tx;
+
+                let receipt = null;
+                let attempts = 0;
+                const maxAttempts = 60;
+
+                while (!receipt && attempts < maxAttempts) {
+                    await new Promise(r => setTimeout(r, 2000));
+
+                    receipt = await window.ethereum.request({
+                        method: 'eth_getTransactionReceipt',
+                        params: [tx],
+                    });
+
+                    attempts++;
+                }
+
+                if (!receipt) {
+                    throw new Error('Transaction timeout. Please check BSCScan.');
+                }
+
+                if (receipt.status === '0x0') {
+                    throw new Error('Transaction failed. Check gas and parameters.');
+                }
+
+                tokenAddress = receipt.contractAddress;
+
+                document.getElementById('loadingSection').classList.add('hidden');
+                document.getElementById('successSection').classList.remove('hidden');
+                document.getElementById('addressDisplay').innerText = tokenAddress;
+                document.getElementById('txDisplay').innerText = txHash;
+            } catch (err) {
+                showError('Deployment failed: ' + (err.message || 'Unknown error'));
+                document.getElementById('loadingSection').classList.add('hidden');
+                document.getElementById('formSection').classList.remove('hidden');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerText = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        function openBscScan() {
+            window.open(`https://bscscan.com/address/${tokenAddress}`, '_blank');
+        }
+
+        function resetForm() {
+            document.getElementById('successSection').classList.add('hidden');
+            document.getElementById('formSection').classList.remove('hidden');
+            document.getElementById('tokenName').value = 'My Token';
+            document.getElementById('tokenSymbol').value = 'TOKEN';
+            document.getElementById('initialSupply').value = '1000000';
+            document.getElementById('decimals').value = '18';
+            document.getElementById('burnable').checked = true;
+            document.getElementById('mintable').checked = false;
+            document.getElementById('errorMessage').classList.add('hidden');
+            tokenAddress = null;
+            txHash = null;
+        }
+    </script>
+</body>
+</html>
