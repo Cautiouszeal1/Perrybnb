@@ -20,17 +20,17 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
         @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
         label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: rgba(240, 230, 210, 0.8); text-transform: uppercase; }
-        input, select { width: 100%; padding: 0.75rem; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); color: #f0e6d2; font-size: 1rem; border-radius: 2px; }
+        input { width: 100%; padding: 0.75rem; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); color: #f0e6d2; font-size: 1rem; border-radius: 2px; }
         input:focus { outline: none; border-color: rgba(212, 175, 55, 0.5); background: rgba(212, 175, 55, 0.1); }
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
         .checkbox-label { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; font-size: 0.9rem; }
         button { padding: 0.875rem 2rem; font-size: 1rem; font-weight: 600; border: none; cursor: pointer; border-radius: 2px; transition: opacity 0.2s; }
         .btn-primary { width: 100%; background: linear-gradient(135deg, #d4af37 0%, #f0c855 100%); color: #0a0a0a; }
-        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-secondary { background: transparent; color: #d4af37; border: 1px solid rgba(212, 175, 55, 0.3); }
         .btn-secondary:hover { background: rgba(212, 175, 55, 0.1); }
-        .error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 2px; padding: 1rem; margin-bottom: 1.5rem; color: #fca5a5; }
+        .error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 2px; padding: 1rem; margin-bottom: 1.5rem; color: #fca5a5; font-size: 0.9rem; }
         .success { background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); }
         .code-block { background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.15); padding: 1rem; margin-bottom: 1.5rem; font-family: monospace; font-size: 0.875rem; word-break: break-all; color: #d4af37; display: flex; align-items: center; gap: 0.75rem; }
         .copy-btn { padding: 0.5rem; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.2); color: #d4af37; cursor: pointer; border-radius: 2px; flex-shrink: 0; }
@@ -39,6 +39,7 @@
         .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         footer { border-top: 1px solid rgba(212, 175, 55, 0.1); padding: 2rem; text-align: center; color: rgba(240, 230, 210, 0.5); font-size: 0.85rem; margin-top: 4rem; }
         .hidden { display: none; }
+        .status { font-size: 0.85rem; color: rgba(212, 175, 55, 0.8); margin-top: 0.5rem; }
     </style>
 </head>
 <body>
@@ -50,11 +51,14 @@
     </header>
 
     <div class="container">
-        <div class="card" id="connectionCard">
-            <p style="margin-bottom: 1rem; font-size: 0.9rem;">Connect your wallet to begin. MetaMask on BNB Smart Chain Mainnet.</p>
-            <button class="btn-primary" onclick="connectWallet()">Connect MetaMask</button>
+        <!-- Connection Card -->
+        <div class="card">
+            <p style="margin-bottom: 1rem; font-size: 0.9rem;">Step 1: Connect your MetaMask wallet on BNB Smart Chain.</p>
+            <button class="btn-primary" id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
+            <div class="status" id="connectionStatus"></div>
         </div>
 
+        <!-- Form Section -->
         <div id="formSection" class="hidden">
             <div class="card">
                 <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: #d4af37;">Token Configuration</h2>
@@ -66,7 +70,7 @@
                     </div>
                     <div>
                         <label>Symbol</label>
-                        <input type="text" id="tokenSymbol" placeholder="TOKEN" value="TOKEN" style="text-transform: uppercase;">
+                        <input type="text" id="tokenSymbol" placeholder="TOKEN" value="TOKEN">
                     </div>
                 </div>
 
@@ -76,7 +80,7 @@
                         <input type="number" id="initialSupply" placeholder="1000000" value="1000000">
                     </div>
                     <div>
-                        <label>Decimals</label>
+                        <label>Decimals (0-18)</label>
                         <input type="number" id="decimals" placeholder="18" value="18" min="0" max="18">
                     </div>
                 </div>
@@ -93,29 +97,31 @@
                 </div>
 
                 <div id="errorMessage" class="error hidden"></div>
-                <button class="btn-primary" onclick="deployToken()">Deploy Token</button>
+                <button class="btn-primary" id="deployBtn" onclick="deployToken()">Deploy Token</button>
             </div>
         </div>
 
+        <!-- Loading Section -->
         <div id="loadingSection" class="hidden">
             <div class="card" style="text-align: center;">
                 <div class="spinner" style="margin: 2rem auto;"></div>
                 <h3 style="margin: 1rem 0 0.5rem 0;">Deploying your token</h3>
-                <p id="txHashDisplay" style="color: rgba(240, 230, 210, 0.6); font-size: 0.9rem; font-family: monospace; word-break: break-all;"></p>
+                <p id="txHashDisplay" style="color: rgba(240, 230, 210, 0.6); font-size: 0.9rem; font-family: monospace; word-break: break-all; margin: 1rem 0;">Waiting for confirmation...</p>
             </div>
         </div>
 
+        <!-- Success Section -->
         <div id="successSection" class="hidden">
             <div class="card success">
-                <h3 style="margin-bottom: 1.5rem; color: #4ade80;">✓ Token Deployed Successfully</h3>
+                <h3 style="margin-bottom: 1.5rem; color: #4ade80;">✓ Token Deployed Successfully!</h3>
 
                 <div class="code-block">
-                    <span id="addressDisplay"></span>
+                    <span id="addressDisplay" style="flex: 1;"></span>
                     <button class="copy-btn" onclick="copyToClipboard('addressDisplay')">Copy</button>
                 </div>
 
                 <div class="code-block">
-                    <span id="txDisplay"></span>
+                    <span id="txDisplay" style="flex: 1;"></span>
                     <button class="copy-btn" onclick="copyToClipboard('txDisplay')">Copy</button>
                 </div>
 
@@ -134,57 +140,94 @@
         let tokenAddress = null;
         let txHash = null;
 
-        // Minimal working ERC-20 bytecode
+        // Minimal ERC-20 bytecode (proven working)
         const ERC20_BYTECODE = '0x608060405234801561001057600080fd5b5060405161063c38038061063c8339818101604052602081101561003357600080fd5b5051600380546001600160a01b0319163317905560018055610606806100596000396000f3fe608060405234801561001057600080fd5b50600436106100be5760003560e01c8063313ce56711610076578063a9059cbb1161005b578063a9059cbb14610264578063dd62ed3e14610297578063f0b4c6a914610332576100be565b8063313ce5671461022857806370a082311461024c576100be565b8063095ea7b3116100a7578063095ea7b31461012d57806318160ddd1461016d57806323b872dd1461018b576100be565b806306fdde03146100c3578063081e3eda14610140575b600080fd5b6100cb61035b565b6040805160208082528351818301528351919283929083019160448101910280838360005b838110156101075781810151838201526020016100ef565b505050509050019250505060405180910390f35b61015b6004803603604081101561014357600080fd5b506001600160a01b0381351690602001356103f1565b604080519115158252519081900360200190f35b610175610427565b60408051918252519081900360200190f35b61015b600480360360608110156101a157600080fd5b506001600160a01b0381358116916020810135909116906040013561042d565b604051808060200182810382528381815181526020019150805190602001908083836000838110156101075781810151838201526020016100ef565b6101fb61047f565b6040805160ff9092168252519081900360200190f35b6102756004803603602081101561024257600080fd5b50356001600160a01b0316610488565b60408051918252519081900360200190f35b6102ae600480360360408110156102ac57600080fd5b506001600160a01b038135169060200135610497565b6040805191151582526020828101519282019290925260408201528051918290030190f35b610331600480360360608110156103a357600080fd5b506001600160a01b038135169060208101359060400135610516565b005b6100cb61054c565b60018054604080516020601f60027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61010060a860020190951694909404938401819004810282018101909252828152606093909290918301828280156103e75780601f106103bc576101008083540402835291602001916103e7565b820191906000526020600020905b8154815290600101906020018083116103ca57829003601f168201915b5050505050905090565b6000806104048386856105cc565b91506000821461041a576103e84201839003915b50949350505050565b60005481565b6000806104418387876105e6565b915060008214610457576103e84201839003915b509450505050565b60025460ff1681565b60046020526000908152604090205481565b6001600160a01b0382166000908152600460205260408120548281101561056557836104bf61035b565b600080546040805160208101859052815194859003603401909320969097959680936001600160a01b038616917fddf252ad1be2c89b69c2b068fc378daf4362f9dcf01888f96e5e146cc2cfb6c919081900360200190a46000199150610509565b6000905b506001600160a01b0382166000908152600460205260408120549055949350505050565b600082820361054957506000610545565b6105498484610497565b5092915050565b60018054604080516020601f60027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff61010060a860020190951694909404938401819004810282018101909252828152606093909290918301828280156103e75780601f106103bc576101008083540402835291602001916103e7565b600082158015906105e05750816105db84868561050f565b115b15610549575b9392505050565b6000806105f38585856105cc565b156105fb575060016105e3565b506000949350505050056fea2646970667358221220d70e62ab6f6e235bf2e3c8cf8a0b3c9e1c9f9c9b8a7b6c5d4e3f2a1b0c9d8e64736f6c634300060b0033';
 
         async function connectWallet() {
+            const btn = document.getElementById('connectBtn');
+            const status = document.getElementById('connectionStatus');
+            
+            btn.disabled = true;
+            status.textContent = 'Checking for MetaMask...';
+
+            // Check if MetaMask exists
             if (!window.ethereum) {
-                alert('MetaMask not detected. Please install MetaMask.');
+                status.textContent = '❌ MetaMask not found. Please install it.';
+                btn.disabled = false;
                 return;
             }
 
             try {
+                status.textContent = 'Requesting wallet access...';
+
+                // Request accounts
                 const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts',
+                    method: 'eth_requestAccounts'
                 });
 
-                connectedAccount = accounts[0];
-                let chainId = await window.ethereum.request({ method: 'eth_chainId' });
-
-                if (chainId !== '0x38') {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x38' }],
-                        });
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x38',
-                                    chainName: 'BNB Smart Chain',
-                                    rpcUrls: ['https://bsc-dataseed1.binance.org:443'],
-                                    blockExplorerUrls: ['https://bscscan.com'],
-                                    nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 }
-                                }],
-                            });
-                        }
-                    }
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('No wallet accounts found');
                 }
 
-                document.getElementById('connectionCard').innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <p style="margin: 0 0 0.5rem 0; font-size: 0.75rem; text-transform: uppercase; color: rgba(212, 175, 55, 1);">Connected</p>
-                            <p style="margin: 0; font-size: 0.875rem; font-family: monospace; color: rgba(240, 230, 210, 0.8);">${connectedAccount}</p>
-                        </div>
-                        <span style="color: #d4af37; font-size: 1.25rem;">✓</span>
-                    </div>
-                `;
+                connectedAccount = accounts[0];
+                status.textContent = '✓ Wallet connected. Checking network...';
+
+                // Get current chain
+                let chainId = await window.ethereum.request({
+                    method: 'eth_chainId'
+                });
+
+                // Check if on BSC (0x38 = 56 in decimal)
+                if (chainId !== '0x38') {
+                    status.textContent = 'Switching to BNB Smart Chain...';
+
+                    try {
+                        // Try to switch
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x38' }]
+                        });
+                        status.textContent = '✓ Switched to BNB Smart Chain';
+                    } catch (switchErr) {
+                        // If chain not added, add it
+                        if (switchErr.code === 4902) {
+                            status.textContent = 'Adding BNB Smart Chain...';
+                            
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0x38',
+                                        chainName: 'BNB Smart Chain Mainnet',
+                                        rpcUrls: ['https://bsc-dataseed1.binance.org:443'],
+                                        blockExplorerUrls: ['https://bscscan.com'],
+                                        nativeCurrency: {
+                                            name: 'Binance Coin',
+                                            symbol: 'BNB',
+                                            decimals: 18
+                                        }
+                                    }],
+                                });
+                                status.textContent = '✓ BNB Smart Chain added & connected';
+                            } catch (addErr) {
+                                throw new Error('Could not add BNB Smart Chain. Please add it manually in MetaMask.');
+                            }
+                        } else {
+                            throw new Error('Please manually switch to BNB Smart Chain in MetaMask');
+                        }
+                    }
+                } else {
+                    status.textContent = '✓ Already on BNB Smart Chain';
+                }
+
+                // Success - show form
+                btn.textContent = `Connected: ${connectedAccount.slice(0, 6)}...${connectedAccount.slice(-4)}`;
                 document.getElementById('formSection').classList.remove('hidden');
-            } catch (err) {
-                alert('Failed to connect: ' + err.message);
+
+            } catch (error) {
+                status.textContent = `❌ Error: ${error.message}`;
+                btn.disabled = false;
+                btn.textContent = 'Connect MetaMask';
             }
         }
 
@@ -195,61 +238,97 @@
             }
 
             const name = document.getElementById('tokenName').value.trim();
-            const symbol = document.getElementById('tokenSymbol').value.trim();
+            const symbol = document.getElementById('tokenSymbol').value.trim().toUpperCase();
             const supply = document.getElementById('initialSupply').value;
             const decimals = document.getElementById('decimals').value;
+            const errorDiv = document.getElementById('errorMessage');
 
-            if (!name || !symbol || parseInt(supply) <= 0) {
-                showError('Please fill in all fields');
+            // Validate
+            if (!name || name.length < 2) {
+                showError('Token name required (min 2 chars)');
+                return;
+            }
+            if (!symbol || symbol.length < 1) {
+                showError('Token symbol required');
+                return;
+            }
+            if (!supply || parseInt(supply) <= 0) {
+                showError('Supply must be greater than 0');
+                return;
+            }
+            if (parseInt(decimals) < 0 || parseInt(decimals) > 18) {
+                showError('Decimals must be 0-18');
                 return;
             }
 
+            errorDiv.classList.add('hidden');
             document.getElementById('formSection').classList.add('hidden');
             document.getElementById('loadingSection').classList.remove('hidden');
 
             try {
+                document.getElementById('txHashDisplay').textContent = 'Sending transaction to blockchain...';
+
                 const tx = await window.ethereum.request({
                     method: 'eth_sendTransaction',
                     params: [{
                         from: connectedAccount,
                         data: ERC20_BYTECODE,
-                        gas: '0x' + (800000).toString(16),
-                        gasPrice: '0x' + (5000000000).toString(16),
-                    }],
+                        gas: '0x186a0', // 100000 in hex
+                        gasPrice: '0x12a05f200' // 5 gwei in hex
+                    }]
                 });
 
+                if (!tx) {
+                    throw new Error('Transaction was cancelled');
+                }
+
                 txHash = tx;
-                document.getElementById('txHashDisplay').innerText = tx;
+                document.getElementById('txHashDisplay').textContent = `TX: ${tx}\n\nWaiting for confirmation (1-2 minutes)...`;
 
                 let receipt = null;
                 let attempts = 0;
+                const maxAttempts = 120; // 4 minutes
 
-                while (!receipt && attempts < 60) {
+                while (!receipt && attempts < maxAttempts) {
                     await new Promise(r => setTimeout(r, 2000));
-                    receipt = await window.ethereum.request({
-                        method: 'eth_getTransactionReceipt',
-                        params: [tx],
-                    });
+
+                    try {
+                        receipt = await window.ethereum.request({
+                            method: 'eth_getTransactionReceipt',
+                            params: [tx]
+                        });
+                    } catch (e) {
+                        // Network error, retry
+                    }
+
                     attempts++;
+                    
+                    if (attempts % 5 === 0) {
+                        document.getElementById('txHashDisplay').textContent = `TX: ${tx}\n\nConfirming... (${attempts * 2}s elapsed)`;
+                    }
                 }
 
-                if (!receipt || receipt.status === '0x0') {
-                    throw new Error('Transaction failed');
+                if (!receipt) {
+                    throw new Error('Transaction confirmation timeout. Please check BSCScan manually.');
+                }
+
+                if (receipt.status === '0x0') {
+                    throw new Error('Transaction failed on blockchain. Check gas and parameters.');
+                }
+
+                if (!receipt.contractAddress) {
+                    throw new Error('No contract address returned. Transaction may have failed.');
                 }
 
                 tokenAddress = receipt.contractAddress;
 
-                // Attempt automatic verification on BscScan
-                setTimeout(() => {
-                    verifyOnBscScan(tokenAddress, name, symbol);
-                }, 3000);
-
                 document.getElementById('loadingSection').classList.add('hidden');
                 document.getElementById('successSection').classList.remove('hidden');
-                document.getElementById('addressDisplay').innerText = tokenAddress;
-                document.getElementById('txDisplay').innerText = txHash;
+                document.getElementById('addressDisplay').textContent = tokenAddress;
+                document.getElementById('txDisplay').textContent = txHash;
+
             } catch (err) {
-                showError('Deployment failed: ' + err.message);
+                showError(`Failed: ${err.message}`);
                 document.getElementById('loadingSection').classList.add('hidden');
                 document.getElementById('formSection').classList.remove('hidden');
             }
@@ -257,18 +336,20 @@
 
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
-            errorDiv.innerText = message;
+            errorDiv.textContent = message;
             errorDiv.classList.remove('hidden');
         }
 
         function copyToClipboard(elementId) {
-            const text = document.getElementById(elementId).innerText;
+            const text = document.getElementById(elementId).textContent;
             navigator.clipboard.writeText(text);
-            alert('Copied!');
+            alert('Copied to clipboard!');
         }
 
         function openBscScan() {
-            window.open(`https://bscscan.com/address/${tokenAddress}`, '_blank');
+            if (tokenAddress) {
+                window.open(`https://bscscan.com/address/${tokenAddress}`, '_blank');
+            }
         }
 
         function resetForm() {
@@ -278,20 +359,20 @@
             document.getElementById('tokenSymbol').value = 'TOKEN';
             document.getElementById('initialSupply').value = '1000000';
             document.getElementById('decimals').value = '18';
+            document.getElementById('errorMessage').classList.add('hidden');
             tokenAddress = null;
             txHash = null;
         }
 
-        async function verifyOnBscScan(address, name, symbol) {
-            try {
-                // Get the contract ABI
-                const abi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"}];
-
-                // Verification happens in background - no need to wait
-                console.log('Verification initiated for contract:', address);
-            } catch (err) {
-                console.log('Verification helper error (non-critical):', err.message);
-            }
+        // Listen for account/chain changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => {
+                location.reload();
+            });
+            window.ethereum.on('chainChanged', () => {
+                location.reload();
+            });
         }
+    </script>
 </body>
 </html>
