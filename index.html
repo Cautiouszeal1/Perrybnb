@@ -361,15 +361,48 @@
                     method: 'eth_requestAccounts',
                 });
 
-                const chainId = await window.ethereum.request({
+                connectedAccount = accounts[0];
+
+                let chainId = await window.ethereum.request({
                     method: 'eth_chainId',
                 });
 
-                connectedAccount = accounts[0];
-
+                // If not on BSC, try to switch
                 if (chainId !== '0x38') {
-                    alert('Please switch to BNB Smart Chain Mainnet (Chain ID: 0x38)');
-                    return;
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x38' }],
+                        });
+                        chainId = '0x38';
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            // Chain not added, try to add it
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: '0x38',
+                                        chainName: 'BNB Smart Chain',
+                                        rpcUrls: ['https://bsc-dataseed1.binance.org:443'],
+                                        blockExplorerUrls: ['https://bscscan.com'],
+                                        nativeCurrency: {
+                                            name: 'BNB',
+                                            symbol: 'BNB',
+                                            decimals: 18
+                                        }
+                                    }],
+                                });
+                                chainId = '0x38';
+                            } catch (addError) {
+                                alert('Please manually switch to BNB Smart Chain in MetaMask');
+                                return;
+                            }
+                        } else {
+                            alert('Please switch to BNB Smart Chain Mainnet');
+                            return;
+                        }
+                    }
                 }
 
                 document.getElementById('connectionCard').innerHTML = `
